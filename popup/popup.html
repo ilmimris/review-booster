@@ -11,7 +11,7 @@
     <!-- Header with title and status -->
     <header class="header">
       <h1 class="title">Review Booster</h1>
-      <div class="status" id="status">
+      <div class="status" id="status" aria-live="polite">
         <span class="status-dot" id="statusDot"></span>
         <span class="status-text" id="statusText">Memeriksa…</span>
       </div>
@@ -31,14 +31,14 @@
 
     <!-- Generate button -->
     <div class="actions">
-      <button id="generateBtn" class="btn btn-disabled" disabled>
+      <button id="generateBtn" class="btn btn-disabled" disabled type="button">
         Generate
       </button>
     </div>
 
     <!-- Footer message area -->
     <footer class="footer">
-      <span id="message"></span>
+      <span id="message" aria-live="polite"></span>
     </footer>
   </div>
 

@@ -173,8 +173,15 @@ generateBtn.addEventListener("click", async () => {
     console.error("Error sending generate message:", err);
     messageEl.textContent = "Error: Tidak dapat terhubung ke halaman";
   } finally {
-    generateBtn.disabled = false;
     generateBtn.textContent = "Generate";
+    // Re-check tab state before re-enabling
+    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+    const onMaps = tab?.url && isGoogleMapsUrl(tab.url);
+    if (onMaps && ipAddressEl.textContent !== "—") {
+      generateBtn.disabled = false;
+    } else {
+      generateBtn.disabled = true;
+    }
   }
 });
 

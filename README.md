@@ -17,6 +17,17 @@ AI-powered Chrome extension for generating Google Maps reviews.
 └── icons/                 # Extension icons (16/48/128px)
 ```
 
+## Testing
+
+```bash
+# Run all tests (validation + unit tests)
+bash test.sh
+
+# Or run individually:
+node validate.cjs          # Structural validation (31 checks)
+node popup/popup.test.cjs  # Unit tests (41 checks)
+```
+
 ## Installation
 
 1. Open Chrome → `chrome://extensions/`

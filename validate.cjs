@@ -73,8 +73,23 @@ for (const [key, iconPath] of Object.entries(manifest.icons)) {
   assert(w === expected && h === expected, `${iconPath} is ${expected}x${expected}`);
 }
 
-// 4. CSP (security)
-console.log("\n[4] Security");
+// 4. Popup UI structure
+console.log("\n[4] Popup UI");
+const popupHTML = readFileSync(join(__dirname, manifest.action.default_popup), "utf-8");
+assert(popupHTML.includes('id="status"') || popupHTML.includes('id="statusDot"'), "Has status indicator");
+assert(popupHTML.includes('id="generateBtn"') || popupHTML.includes("generateBtn"), "Has Generate button");
+assert(popupHTML.includes('id="statusText"'), "Has status text element");
+assert(popupHTML.includes("popup.css"), "Links to popup.css");
+assert(popupHTML.includes("popup.js"), "Links to popup.js");
+
+// 5. Content script functionality
+console.log("\n[5] Content script");
+const contentJS = readFileSync(join(__dirname, manifest.content_scripts[0].js[0]), "utf-8");
+assert(contentJS.includes("chrome.runtime.onMessage"), "Listens for messages");
+assert(contentJS.includes("generateReview"), "Handles generateReview action");
+
+// 6. CSP (security)
+console.log("\n[6] Security");
 assert(
   manifest.content_security_policy?.extension_pages,
   "Content Security Policy defined for extension pages"

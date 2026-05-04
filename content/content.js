@@ -9,7 +9,6 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const result = handleGenerateReview();
     sendResponse(result);
   }
-  return true; // Keep message channel open for async response
 });
 
 function handleGenerateReview() {
@@ -48,6 +47,8 @@ function extractPlaceInfo() {
 }
 
 function showNotification(title, message) {
+  if (!document.body) return;
+
   // Create a simple toast notification on the page
   const toast = document.createElement("div");
   toast.style.cssText = `

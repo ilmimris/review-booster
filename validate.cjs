@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Quick validation script for the Review Booster Chrome extension.
- * Run: node validate.js
+ * Run: node validate.cjs
  */
 
 const { readFileSync, existsSync } = require("fs");

@@ -164,7 +164,6 @@ generateBtn.addEventListener("click", async () => {
     if (chrome.runtime.lastError) {
       throw new Error(chrome.runtime.lastError.message);
     }
-
     if (response?.status === "success") {
       messageEl.textContent = `Review dimulai untuk: ${response.placeInfo?.name || "tempat ini"}`;
     } else {

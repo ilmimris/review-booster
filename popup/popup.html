@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review Booster</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header class="header">
+      <h1 class="title">Review Booster</h1>
+      <div class="status" id="status">
+        <span class="status-dot" id="statusDot"></span>
+        <span class="status-text" id="statusText">Inactive</span>
+      </div>
+    </header>
+
+    <main class="main">
+      <p class="description">Generate AI-powered reviews for Google Maps listings.</p>
+
+      <div class="actions">
+        <button id="generateBtn" class="btn btn-primary" disabled>
+          Generate
+        </button>
+      </div>
+    </main>
+
+    <footer class="footer">
+      <span id="message"></span>
+    </footer>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

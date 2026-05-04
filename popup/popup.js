@@ -2,6 +2,10 @@ const generateBtn = document.getElementById("generateBtn");
 const statusDot = document.getElementById("statusDot");
 const statusText = document.getElementById("statusText");
 const statusEl = document.getElementById("status");
+const ipAddressEl = document.getElementById("ipAddress");
+const instructionEl = document.getElementById("instruction");
+const instructionIcon = document.getElementById("instructionIcon");
+const instructionText = document.getElementById("instructionText");
 const messageEl = document.getElementById("message");
 
 // Matches both www.google.com/maps and maps.google.com
@@ -17,70 +21,163 @@ function isGoogleMapsUrl(url) {
   }
 }
 
-// Check if we're on a Google Maps page via the background service worker
-async function checkPageStatus() {
+// ── IP fetching ──
+const IP_API = "https://api.ipify.org?format=json";
+
+async function fetchPublicIP() {
   try {
-    const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-
-    if (tab && tab.url && isGoogleMapsUrl(tab.url)) {
-      setStatus(true, "Active");
-      generateBtn.disabled = false;
-      messageEl.textContent = "Ready to generate reviews";
-    } else {
-      setStatus(false, "Inactive");
-      generateBtn.disabled = true;
-      messageEl.textContent = "Navigate to Google Maps to use this extension";
-    }
+    const res = await fetch(IP_API);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    return data.ip;
   } catch (err) {
-    console.error("Error checking page status:", err);
-    setStatus(false, "Error");
+    console.error("Failed to fetch public IP:", err);
+    return null;
+  }
+}
+
+// ── IP safety heuristic ──
+// Checks whether an IP is a routable public address.
+// Private, loopback, link-local, and reserved ranges are flagged as danger.
+function isPublicIP(ip) {
+  if (!ip) return false;
+  const parts = ip.split(".").map(Number);
+  if (parts.length !== 4 || parts.some((n) => isNaN(n) || n < 0 || n > 255)) return false;
+
+  const [a, b] = parts;
+
+  // 10.0.0.0/8
+  if (a === 10) return false;
+  // 172.16.0.0/12
+  if (a === 172 && b >= 16 && b <= 31) return false;
+  // 192.168.0.0/16
+  if (a === 192 && b === 168) return false;
+  // 127.0.0.0/8 (loopback)
+  if (a === 127) return false;
+  // 169.254.0.0/16 (link-local)
+  if (a === 169 && b === 254) return false;
+  // 0.0.0.0
+  if (a === 0) return false;
+
+  return true;
+}
+
+// ── UI state helpers ──
+function setSafe() {
+  statusEl.className = "status safe";
+  statusText.textContent = "Aman";
+  instructionEl.className = "instruction safe";
+  instructionIcon.textContent = "✅";
+  instructionText.textContent =
+    "Koneksi Anda aman. Anda dapat melanjutkan generate review.";
+  generateBtn.disabled = false;
+  generateBtn.className = "btn btn-primary";
+}
+
+function setDanger(reason) {
+  statusEl.className = "status danger";
+  statusText.textContent = "Bahaya";
+  instructionEl.className = "instruction danger";
+  instructionIcon.textContent = "⚠️";
+  instructionText.textContent =
+    reason || "IP terdeteksi tidak aman. Gunakan jaringan yang lebih terpercaya sebelum generate.";
+  generateBtn.disabled = true;
+  generateBtn.className = "btn btn-primary";
+}
+
+function setLoading() {
+  statusEl.className = "status";
+  statusText.textContent = "Memeriksa…";
+  instructionEl.className = "instruction";
+  instructionIcon.textContent = "⏳";
+  instructionText.textContent = "Memeriksa keamanan koneksi…";
+  generateBtn.disabled = true;
+}
+
+function setError(msg) {
+  statusEl.className = "status danger";
+  statusText.textContent = "Error";
+  instructionEl.className = "instruction danger";
+  instructionIcon.textContent = "❌";
+  instructionText.textContent = msg || "Gagal memeriksa status koneksi.";
+  generateBtn.disabled = true;
+}
+
+// ── Main init ──
+async function init() {
+  setLoading();
+
+  // Check if on Google Maps first
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+  const onMaps = tab?.url && isGoogleMapsUrl(tab.url);
+
+  const ip = await fetchPublicIP();
+
+  if (!ip) {
+    setError("Tidak dapat mendeteksi IP publik. Periksa koneksi internet Anda.");
+    ipAddressEl.textContent = "—";
+    return;
+  }
+
+  ipAddressEl.textContent = ip;
+
+  if (!onMaps) {
+    // On Maps takes priority for enabling, but still show IP status
+    if (isPublicIP(ip)) {
+      setSafe();
+      instructionText.textContent =
+        "Koneksi aman. Buka Google Maps untuk mulai generate review.";
+    } else {
+      setDanger(
+        "IP terdeteksi sebagai alamat privat/lokal. Gunakan jaringan publik yang aman."
+      );
+    }
     generateBtn.disabled = true;
-    messageEl.textContent = "Could not determine page status";
+    messageEl.textContent = "Buka Google Maps terlebih dahulu";
+    return;
   }
-}
 
-function setStatus(active, text) {
-  if (active) {
-    statusEl.classList.add("active");
+  if (isPublicIP(ip)) {
+    setSafe();
   } else {
-    statusEl.classList.remove("active");
+    setDanger(
+      "IP ini terdeteksi sebagai alamat privat/lokal. Gunakan jaringan publik yang aman sebelum generate."
+    );
   }
-  statusText.textContent = text;
 }
 
-// Generate button click handler
+// ── Generate button handler ──
 generateBtn.addEventListener("click", async () => {
   generateBtn.disabled = true;
-  generateBtn.textContent = "Generating...";
-  messageEl.textContent = "Generating review...";
+  generateBtn.textContent = "Generating…";
+  messageEl.textContent = "Sedang memproses…";
 
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
     if (!tab?.id) {
-      throw new Error("No active tab found");
+      throw new Error("Tab aktif tidak ditemukan");
     }
 
     const response = await chrome.tabs.sendMessage(tab.id, { action: "generateReview" });
 
-    // Check for runtime errors (content script may not be loaded)
     if (chrome.runtime.lastError) {
       throw new Error(chrome.runtime.lastError.message);
     }
 
     if (response?.status === "success") {
-      messageEl.textContent = `Review started for: ${response.placeInfo.name}`;
+      messageEl.textContent = `Review dimulai untuk: ${response.placeInfo?.name || "tempat ini"}`;
     } else {
-      messageEl.textContent = response?.reason || "Unknown error occurred";
+      messageEl.textContent = response?.reason || "Terjadi kesalahan";
     }
   } catch (err) {
     console.error("Error sending generate message:", err);
-    messageEl.textContent = "Error: Could not connect to page";
+    messageEl.textContent = "Error: Tidak dapat terhubung ke halaman";
   } finally {
     generateBtn.disabled = false;
     generateBtn.textContent = "Generate";
   }
 });
 
-// Initialize on popup open
-checkPageStatus();
+// Run on popup open
+init();

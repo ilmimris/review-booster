@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,24 +8,35 @@
 </head>
 <body>
   <div class="container">
+    <!-- Header with title and status -->
     <header class="header">
       <h1 class="title">Review Booster</h1>
       <div class="status" id="status">
         <span class="status-dot" id="statusDot"></span>
-        <span class="status-text" id="statusText">Inactive</span>
+        <span class="status-text" id="statusText">Memeriksa…</span>
       </div>
     </header>
 
-    <main class="main">
-      <p class="description">Generate AI-powered reviews for Google Maps listings.</p>
+    <!-- IP address display -->
+    <section class="ip-section">
+      <div class="ip-label">IP Publik Anda</div>
+      <div class="ip-value" id="ipAddress">—</div>
+    </section>
 
-      <div class="actions">
-        <button id="generateBtn" class="btn btn-primary" disabled>
-          Generate
-        </button>
-      </div>
-    </main>
+    <!-- Safety instruction message -->
+    <section class="instruction" id="instruction">
+      <div class="instruction-icon" id="instructionIcon">⏳</div>
+      <p class="instruction-text" id="instructionText">Memeriksa keamanan koneksi…</p>
+    </section>
 
+    <!-- Generate button -->
+    <div class="actions">
+      <button id="generateBtn" class="btn btn-primary" disabled>
+        Generate
+      </button>
+    </div>
+
+    <!-- Footer message area -->
     <footer class="footer">
       <span id="message"></span>
     </footer>

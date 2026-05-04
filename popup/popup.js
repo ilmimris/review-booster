@@ -71,7 +71,7 @@ function setSafe() {
   instructionText.textContent =
     "Koneksi Anda aman. Anda dapat melanjutkan generate review.";
   generateBtn.disabled = false;
-  generateBtn.className = "btn btn-primary";
+  generateBtn.className = "btn btn-safe";
 }
 
 function setDanger(reason) {
@@ -82,7 +82,7 @@ function setDanger(reason) {
   instructionText.textContent =
     reason || "IP terdeteksi tidak aman. Gunakan jaringan yang lebih terpercaya sebelum generate.";
   generateBtn.disabled = true;
-  generateBtn.className = "btn btn-primary";
+  generateBtn.className = "btn btn-danger";
 }
 
 function setLoading() {

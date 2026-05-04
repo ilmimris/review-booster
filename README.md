@@ -27,7 +27,10 @@ AI-powered Chrome extension for generating Google Maps reviews.
 
 ## Usage
 
-- The popup status indicator turns **green** when on a Google Maps page
+- The popup displays your public IP and connection safety status:
+  - **Aman** (green) — safe public IP detected, ready to generate
+  - **Bahaya** (red) — private/local IP detected, use a safer network
+- Navigate to Google Maps to enable the **Generate** button
 - Click **Generate** to trigger review generation on the current place
 - A toast notification appears on the Maps page confirming the action
 

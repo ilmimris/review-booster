@@ -3,7 +3,7 @@
   "name": "Review Booster",
   "version": "1.0.0",
   "description": "AI-powered Google Maps review generator",
-  "permissions": ["activeTab"],
+  "permissions": ["activeTab", "storage"],
   "host_permissions": [
     "https://*.google.com/maps/*",
     "https://*.google.*/maps/*",

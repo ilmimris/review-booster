@@ -41,6 +41,22 @@ async function fetchPublicIP() {
 // Private, loopback, link-local, and reserved ranges are flagged as danger.
 function isPublicIP(ip) {
   if (!ip) return false;
+
+  // ── IPv6 ──
+  if (ip.includes(":")) {
+    const lower = ip.toLowerCase();
+    // ::1 loopback
+    if (lower === "::1" || lower === "0:0:0:0:0:0:0:1") return false;
+    // fc00::/7 unique-local
+    if (/^f[cd]/.test(lower)) return false;
+    // fe80::/10 link-local
+    if (/^fe[89ab]/.test(lower)) return false;
+    // :: (unspecified)
+    if (lower === "::" || lower === "0:0:0:0:0:0:0:0") return false;
+    return true;
+  }
+
+  // ── IPv4 ──
   const parts = ip.split(".").map(Number);
   if (parts.length !== 4 || parts.some((n) => isNaN(n) || n < 0 || n > 255)) return false;
 

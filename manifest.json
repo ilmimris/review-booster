@@ -5,8 +5,8 @@
   "description": "AI-powered Google Maps review generator",
   "permissions": ["activeTab"],
   "host_permissions": [
-    "https://www.google.com/maps/*",
-    "https://maps.google.com/maps/*",
+    "https://*.google.com/maps/*",
+    "https://*.google.*/maps/*",
     "https://api.ipify.org/*"
   ],
   "action": {
@@ -23,8 +23,8 @@
   "content_scripts": [
     {
       "matches": [
-        "https://www.google.com/maps/*",
-        "https://maps.google.com/maps/*"
+        "https://*.google.com/maps/*",
+        "https://*.google.*/maps/*"
       ],
       "js": ["content/content.js"],
       "run_at": "document_idle"

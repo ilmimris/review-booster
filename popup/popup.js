@@ -8,14 +8,16 @@ const instructionIcon = document.getElementById("instructionIcon");
 const instructionText = document.getElementById("instructionText");
 const messageEl = document.getElementById("message");
 
-// Matches both www.google.com/maps and maps.google.com
+// Matches both www.google.com/maps and maps.google.com, plus country TLDs
 function isGoogleMapsUrl(url) {
   try {
     const u = new URL(url);
-    return (
-      (u.hostname === "www.google.com" || u.hostname === "maps.google.com") &&
-      u.pathname.startsWith("/maps")
-    );
+    const isGoogleHost =
+      u.hostname === "www.google.com" ||
+      u.hostname === "maps.google.com" ||
+      /^maps\.google\.[a-z]{2,}(\.[a-z]{2})?$/.test(u.hostname) ||
+      /^www\.google\.[a-z]{2,}(\.[a-z]{2})?$/.test(u.hostname);
+    return isGoogleHost && u.pathname.startsWith("/maps");
   } catch {
     return false;
   }

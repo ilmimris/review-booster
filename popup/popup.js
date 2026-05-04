@@ -4,12 +4,25 @@ const statusText = document.getElementById("statusText");
 const statusEl = document.getElementById("status");
 const messageEl = document.getElementById("message");
 
+// Matches both www.google.com/maps and maps.google.com
+function isGoogleMapsUrl(url) {
+  try {
+    const u = new URL(url);
+    return (
+      (u.hostname === "www.google.com" || u.hostname === "maps.google.com") &&
+      u.pathname.startsWith("/maps")
+    );
+  } catch {
+    return false;
+  }
+}
+
 // Check if we're on a Google Maps page via the background service worker
 async function checkPageStatus() {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    if (tab && tab.url && tab.url.includes("google.com/maps")) {
+    if (tab && tab.url && isGoogleMapsUrl(tab.url)) {
       setStatus(true, "Active");
       generateBtn.disabled = false;
       messageEl.textContent = "Ready to generate reviews";

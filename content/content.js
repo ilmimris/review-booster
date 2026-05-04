@@ -6,9 +6,10 @@ console.log("[Review Booster] Content script loaded on:", window.location.href);
 // Listen for messages from the popup
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "generateReview") {
-    handleGenerateReview();
-    sendResponse({ status: "started" });
+    const result = handleGenerateReview();
+    sendResponse(result);
   }
+  return true; // Keep message channel open for async response
 });
 
 function handleGenerateReview() {
@@ -20,8 +21,10 @@ function handleGenerateReview() {
   if (placeInfo) {
     console.log("[Review Booster] Place info:", placeInfo);
     showNotification("Review Booster", `Preparing review for: ${placeInfo.name}`);
+    return { status: "success", placeInfo };
   } else {
     showNotification("Review Booster", "Could not detect place information");
+    return { status: "error", reason: "no_place_info" };
   }
 }
 

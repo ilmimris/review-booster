@@ -44,10 +44,21 @@ generateBtn.addEventListener("click", async () => {
   try {
     const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
 
-    if (tab) {
-      // Send message to content script to start review generation
-      await chrome.tabs.sendMessage(tab.id, { action: "generateReview" });
-      messageEl.textContent = "Review generation started!";
+    if (!tab?.id) {
+      throw new Error("No active tab found");
+    }
+
+    const response = await chrome.tabs.sendMessage(tab.id, { action: "generateReview" });
+
+    // Check for runtime errors (content script may not be loaded)
+    if (chrome.runtime.lastError) {
+      throw new Error(chrome.runtime.lastError.message);
+    }
+
+    if (response?.status === "success") {
+      messageEl.textContent = `Review started for: ${response.placeInfo.name}`;
+    } else {
+      messageEl.textContent = response?.reason || "Unknown error occurred";
     }
   } catch (err) {
     console.error("Error sending generate message:", err);

@@ -95,6 +95,10 @@ assert(
   "Content Security Policy defined for extension pages"
 );
 
+// 7. Tests
+console.log("\n[7] Tests");
+assert(existsSync(join(__dirname, "popup/popup.test.cjs")), "popup/popup.test.cjs exists");
+
 // Summary
 console.log(`\n${"=".repeat(40)}`);
 console.log(`Results: ${pass} passed, ${fail} failed`);

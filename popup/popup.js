@@ -1,13 +1,4 @@
-const generateBtn = document.getElementById("generateBtn");
-const statusDot = document.getElementById("statusDot");
-const statusText = document.getElementById("statusText");
-const statusEl = document.getElementById("status");
-const ipAddressEl = document.getElementById("ipAddress");
-const instructionEl = document.getElementById("instruction");
-const instructionIcon = document.getElementById("instructionIcon");
-const instructionText = document.getElementById("instructionText");
-const messageEl = document.getElementById("message");
-
+// ── Pure utility functions (exported for testing) ──
 // Matches both www.google.com/maps and maps.google.com, plus country TLDs
 function isGoogleMapsUrl(url) {
   try {
@@ -23,6 +14,47 @@ function isGoogleMapsUrl(url) {
   }
 }
 
+// Checks whether an IP is a routable public address.
+// Private, loopback, link-local, and reserved ranges are flagged as danger.
+function isPublicIP(ip) {
+  if (!ip) return false;
+
+  // ── IPv6 ──
+  if (ip.includes(":")) {
+    const lower = ip.toLowerCase();
+    if (lower === "::1" || lower === "0:0:0:0:0:0:0:1") return false;
+    if (/^f[cd]/.test(lower)) return false;
+    if (/^fe[89ab]/.test(lower)) return false;
+    if (lower === "::" || lower === "0:0:0:0:0:0:0:0") return false;
+    return true;
+  }
+
+  // ── IPv4 ──
+  const parts = ip.split(".").map(Number);
+  if (parts.length !== 4 || parts.some((n) => isNaN(n) || n < 0 || n > 255)) return false;
+
+  const [a, b] = parts;
+  if (a === 10) return false;
+  if (a === 172 && b >= 16 && b <= 31) return false;
+  if (a === 192 && b === 168) return false;
+  if (a === 127) return false;
+  if (a === 169 && b === 254) return false;
+  if (a === 0) return false;
+
+  return true;
+}
+
+// ── DOM elements ──
+const generateBtn = document.getElementById("generateBtn");
+const statusDot = document.getElementById("statusDot");
+const statusText = document.getElementById("statusText");
+const statusEl = document.getElementById("status");
+const ipAddressEl = document.getElementById("ipAddress");
+const instructionEl = document.getElementById("instruction");
+const instructionIcon = document.getElementById("instructionIcon");
+const instructionText = document.getElementById("instructionText");
+const messageEl = document.getElementById("message");
+
 // ── IP fetching ──
 const IP_API = "https://api.ipify.org?format=json";
 
@@ -36,48 +68,6 @@ async function fetchPublicIP() {
     console.error("Failed to fetch public IP:", err);
     return null;
   }
-}
-
-// ── IP safety heuristic ──
-// Checks whether an IP is a routable public address.
-// Private, loopback, link-local, and reserved ranges are flagged as danger.
-function isPublicIP(ip) {
-  if (!ip) return false;
-
-  // ── IPv6 ──
-  if (ip.includes(":")) {
-    const lower = ip.toLowerCase();
-    // ::1 loopback
-    if (lower === "::1" || lower === "0:0:0:0:0:0:0:1") return false;
-    // fc00::/7 unique-local
-    if (/^f[cd]/.test(lower)) return false;
-    // fe80::/10 link-local
-    if (/^fe[89ab]/.test(lower)) return false;
-    // :: (unspecified)
-    if (lower === "::" || lower === "0:0:0:0:0:0:0:0") return false;
-    return true;
-  }
-
-  // ── IPv4 ──
-  const parts = ip.split(".").map(Number);
-  if (parts.length !== 4 || parts.some((n) => isNaN(n) || n < 0 || n > 255)) return false;
-
-  const [a, b] = parts;
-
-  // 10.0.0.0/8
-  if (a === 10) return false;
-  // 172.16.0.0/12
-  if (a === 172 && b >= 16 && b <= 31) return false;
-  // 192.168.0.0/16
-  if (a === 192 && b === 168) return false;
-  // 127.0.0.0/8 (loopback)
-  if (a === 127) return false;
-  // 169.254.0.0/16 (link-local)
-  if (a === 169 && b === 254) return false;
-  // 0.0.0.0
-  if (a === 0) return false;
-
-  return true;
 }
 
 // ── UI state helpers ──
